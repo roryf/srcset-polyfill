@@ -33,24 +33,25 @@
    */
   ViewportInfo.prototype.getBestImage = function(srcsetInfo) {
     var images = srcsetInfo.imageCandidates.slice(0);
+    var viewportInfo = this;
     // Get the largest width.
     var largestWidth = this._getBestCandidateIf(images, function(a, b) { return a.w > b.w; });
     // Remove all candidates with widths less than client width.
-    this._removeCandidatesIf(images, function(a) { return a.w < this.w; }.bind(this));
+    this._removeCandidatesIf(images, function(a) { return a.w < viewportInfo.w; });
     // If none are left, keep the one with largest width.
     if (images.length === 0) { images = [largestWidth]; }
 
     // Get the largest height.
     var largestHeight = this._getBestCandidateIf(images, function(a, b) { return a.h > b.h; });
     // Remove all candidates with heights less than client height.
-    this._removeCandidatesIf(images, function(a) { return a.h < this.h; }.bind(this));
+    this._removeCandidatesIf(images, function(a) { return a.h < viewportInfo.h; });
     // If none are left, keep one with largest height.
     if (images.length === 0) { images = [largestHeight]; }
 
     // Get the largest pixel density.
     var largestPxDensity = this._getBestCandidateIf(images, function(a, b) { return a.x > b.x; });
     // Remove all candidates with pxdensity less than client pxdensity.
-    this._removeCandidatesIf(images, function(a) { return a.x < this.x; }.bind(this));
+    this._removeCandidatesIf(images, function(a) { return a.x < viewportInfo.x; });
     // If none are left, keep one with largest pixel density.
     if (images.length === 0) { images = [largestPxDensity]; }
 
