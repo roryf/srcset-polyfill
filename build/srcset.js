@@ -750,6 +750,10 @@ var jsUri = Uri;
     }
   }
 
-  window.addEventListener('DOMContentLoaded', main);
+  if ('domready' in window) {
+    window.domready(main);
+  } else {
+    window.addEventListener('DOMContentLoaded', main);
+  }
 
 })(window);
