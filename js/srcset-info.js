@@ -73,7 +73,7 @@
     for (var i = 0; i < descriptors.length; i++) {
       var desc = descriptors[i];
       if (desc.length > 0) {
-        var lastChar = desc[desc.length-1];
+        var lastChar = desc.charAt(desc.length-1);
         var value = desc.substring(0, desc.length-1);
         var intVal = parseInt(value, 10);
         var floatVal = parseFloat(value);
