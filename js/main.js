@@ -9,7 +9,6 @@
     // If the browser doesn't support querySelectorAll or supports @srcset natively, don't do any polyfill.
     if (!('querySelectorAll' in document) || isSrcsetImplemented()) {
       // TODO extract <img> from <noscript> and append to <div>
-      alert('nae-chance');
       return;
     }
 
