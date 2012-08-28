@@ -10,10 +10,11 @@
       body { background: gray; }
     </style>
   </head>
-
-  <div id="container"><img alt="The Breakfast Combo"
-         src="banner.jpeg"
-         srcset="banner-HD.jpeg 2x, banner-phone.jpeg 100w, banner-phone-HD.jpeg 100w 2x"></div>
+  <body>
+    <div id="container">
+      <div data-src="banner.jpeg" data-srcset="banner-HD.jpeg 2x, banner-phone.jpeg 100w, banner-phone-HD.jpeg 100w 2x" data-alt="The Breakfast Combo">
+        <noscript><img src="banner.jpeg" alt="The Breakfast Combo" srcset="banner-HD.jpeg 2x, banner-phone.jpeg 100w, banner-phone-HD.jpeg 100w 2x" /></noscript>
+      </div>
+    </div>
   </body>
 </html>
-
