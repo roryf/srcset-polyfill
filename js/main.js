@@ -5,10 +5,28 @@
     return 'srcset' in img;
   }
 
+  function insertNative() {
+    // TODO: DRY up this with the real polyfill, too much overlap?
+    // TODO: better selector we can use here?
+    var divs = document.getElementsByTagName('div');
+    for (var i = 0, l = divs.length; i < l; i++) {
+      var div = divs[i];
+      // Prefer hasAttribute but fallback to getAttribute, making the assumption is returns null for non-existent attributes
+      if (typeof(document.hasAttribute) === "undefined" ? div.getAttribute('data-srcset') !== null : div.hasAttribute('data-srcset')) {
+        var img = document.createElement('img');
+        img.alt = div.getAttribute('data-alt');
+        img.src = div.getAttribute('data-src');
+        img.setAttribute('srcset', div.getAttribute('data-srcset'));
+        div.appendChild(img);
+      }
+    }
+  }
+
   function main() {
     // If the browser doesn't support querySelectorAll or supports @srcset natively, don't do any polyfill.
+    // Ideally we would just bail if querySelectorAll is not supported, but because of the <noscript> we have to insert an image somehow
     if (!('querySelectorAll' in document) || isSrcsetImplemented()) {
-      // TODO extract <img> from <noscript> and append to <div>
+      insertNative();
       return;
     }
 
