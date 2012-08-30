@@ -15,15 +15,15 @@
     var viewportInfo = new ViewportInfo();
     viewportInfo.compute();
     // Go through all images on the page.
-    var images = document.querySelectorAll('img');
+    var images = document.getElementsByTagName('img');
     // If they have srcset attributes, apply JS to handle that correctly.
-    for (var i = 0; i < images.length; i++) {
+    for (var i = 0, l = images.length; i < l; i++) {
       var img = images[i];
       // Parse the srcset from the image element.
-      var srcset = img.attributes.srcset;
+      var srcset = img.getAttribute('srcset');
       if (srcset) {
         var srcsetInfo = new SrcsetInfo({src: img.src,
-                                      srcset: srcset.textContent});
+                                      srcset: srcset});
         // Go through all the candidates, pick the best one that matches.
         var imageInfo = viewportInfo.getBestImage(srcsetInfo);
         // TODO: consider using -webkit-image-set instead (if available).
