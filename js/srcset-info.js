@@ -1,7 +1,7 @@
 (function(exports) {
 
   // Directly from http://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url:
-  var urlRegex = '[-a-zA-Z0-9@:%_+.~#?&//=]*';
+  var urlRegex = '[-a-zA-Z0-9@:%_+,.~#?&//=]*';
   var imageFragmentRegex = '\\s*(' + urlRegex + ')\\s*([0-9xwh.\\s]*)';
   var srcsetRegex = '(' + imageFragmentRegex + ',?)+';
 
@@ -29,7 +29,7 @@
    */
   SrcsetInfo.prototype._parse = function() {
     // Get image candidate fragments from srcset string.
-    var candidateStrings = this.srcsetValue.split(',');
+    var candidateStrings = this.srcsetValue.split(', ');
     // Iterate through the candidates.
     for (var i = 0; i < candidateStrings.length; i++) {
       var candidate = candidateStrings[i];

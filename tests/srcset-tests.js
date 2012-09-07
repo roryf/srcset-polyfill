@@ -30,6 +30,16 @@ test('single image declarations set to the right defaults', function() {
   equal(img.h, Infinity, 'default height set');
 });
 
+test('single image declarations with comma in url set to the right defaults', function() {
+  var commaSrc = 'image.ashx?image_id=0982342342&rgn=0,4,65,128';
+  var s1 = new SrcsetInfo({srcset: commaSrc});
+  var img = s1.imageCandidates[0];
+  equal(img.src, commaSrc, 'src portion with comma preserved');
+  equal(img.x, 1, 'default density set');
+  equal(img.w, Infinity, 'default width set');
+  equal(img.h, Infinity, 'default height set');
+});
+
 test('single image declarations parse correctly', function() {
   var s1 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 720w'});
   var img = s1.imageCandidates[0];
