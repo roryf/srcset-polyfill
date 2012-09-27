@@ -474,14 +474,7 @@ var jsUri = Uri;
 
 (function(exports) {
 
-  // Directly from http://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url:
-  var urlRegex = '[-a-zA-Z0-9@:%_+.~#?&//=]*';
-  var imageFragmentRegex = '\\s*(' + urlRegex + ')\\s*([0-9xwh.\\s]*)';
-  var srcsetRegex = '(' + imageFragmentRegex + ',?)+';
-
-  var IMAGE_FRAGMENT_REGEXP = new RegExp(imageFragmentRegex);
-  var SRCSET_REGEXP = new RegExp(srcsetRegex);
-  var INT_REGEXP = /^[0-9]+$/;
+  var INT_REGEXP = /^[0-9]+$/ig;
 
   function SrcsetInfo(options) {
     this.imageCandidates = [];
@@ -496,33 +489,69 @@ var jsUri = Uri;
     }
   }
 
+
+
   /**
    * Parses the string that goes srcset="here".
    *
    * @returns [{url: _, x: _, w: _, h:_}, ...]
    */
   SrcsetInfo.prototype._parse = function() {
-    // Get image candidate fragments from srcset string.
-    var candidateStrings = this.srcsetValue.split(',');
-    // Iterate through the candidates.
-    for (var i = 0; i < candidateStrings.length; i++) {
-      var candidate = candidateStrings[i];
-      // Get all details for the candidate.
-      var match = candidate.match(IMAGE_FRAGMENT_REGEXP);
-      var src = match[1];
-      var desc = this._parseDescriptors(match[2]);
-      var imageInfo = new ImageInfo({
-        src: match[1],
-        x: desc.x,
-        w: desc.w,
-        h: desc.h
-      });
-      this._addCandidate(imageInfo);
+    if (this.srcsetValue !== null) {
+      var value = this.srcsetValue;
+      var length = value.length;
+      var position = 0;
+      var currentUrl = [];
+      var currentDescriptor = [];
+      var parsingState = 1;
+
+      while (position < length) {
+        var currentChar = value[position];
+        switch (parsingState) {
+          case 1:
+            if (currentChar === ' ') {
+              parsingState = 2;
+            } else {
+              currentUrl.push(currentChar);
+            }
+            break;
+          case 2:
+            if (currentChar === ',') {
+              this._parseCandidate(currentUrl.join(''), currentDescriptor.join(''));
+              currentUrl = [];
+              currentDescriptor = [];
+              parsingState = 3;
+            } else {
+              currentDescriptor.push(currentChar);
+            }
+            break;
+          case 3:
+            if (currentChar !== ' ') {
+              position--;
+              parsingState = 1;
+            }
+        }
+        position++;
+      }
+
+      this._parseCandidate(currentUrl.join(''), currentDescriptor.join(''));
     }
+
     // If there's a srcValue, add it to the candidates too.
     if (this.srcValue) {
       this._addCandidate(new ImageInfo({src: this.srcValue}));
     }
+  };
+
+  SrcsetInfo.prototype._parseCandidate = function(src, descriptor) {
+    var desc = this._parseDescriptors(descriptor.trim());
+    var imageInfo = new ImageInfo({
+      src: src,
+      x: desc.x,
+      w: desc.w,
+      h: desc.h
+    });
+    this._addCandidate(imageInfo);
   };
 
   /**
@@ -542,7 +571,14 @@ var jsUri = Uri;
   };
 
   SrcsetInfo.prototype._parseDescriptors = function(descString) {
+    if (descString === '') {
+      this.error = 'Empty descriptor found for srcset candidate.';
+      this.isValid = false;
+      return {};
+    }
+
     var descriptors = descString.split(/\s/);
+
     var out = {};
     for (var i = 0; i < descriptors.length; i++) {
       var desc = descriptors[i];
