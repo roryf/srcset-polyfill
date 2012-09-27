@@ -1,8 +1,6 @@
 module('srcset validation');
 
 test('valid image candidate strings validate', function() {
-  var s1 = new SrcsetInfo({src: 'pear.jpeg', srcset: 'pear-mobile.jpeg'});
-  ok(s1.isValid, 'simple image candidates without descriptors understood.');
   var s2 = new SrcsetInfo({src: 'pear.jpeg', srcset: 'pear-mobile.jpeg 720w'});
   ok(s2.isValid, 'simple image candidates understood.');
   var s3 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 1.1x'});
@@ -14,6 +12,8 @@ test('valid image candidate strings validate', function() {
 });
 
 test('invalid image candidate strings do not validate', function() {
+  var s1 = new SrcsetInfo({src: 'pear.jpeg', srcset: 'pear-mobile.jpeg'});
+  ok(!s1.isValid, 'simple image candidates without descriptors rejected.');
   var s1 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 720k, pear-tablet.jpeg 1280w'});
   ok(!s1.isValid, 'unknown descriptor units rejected');
   var s2 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 7.2w, pear-tablet.jpeg 1280w'});
@@ -22,12 +22,14 @@ test('invalid image candidate strings do not validate', function() {
 
 module('srcset parsing');
 
-test('single image declarations set to the right defaults', function() {
-  var s1 = new SrcsetInfo({srcset: 'pear-mobile.jpeg'});
+test('image declarations set to the right defaults', function() {
+  var s1 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 100w'});
   var img = s1.imageCandidates[0];
   equal(img.x, 1, 'default density set');
-  equal(img.w, Infinity, 'default width set');
   equal(img.h, Infinity, 'default height set');
+  var s2 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 100h'});
+  var img2 = s2.imageCandidates[0];
+  equal(img2.w, Infinity, 'default width set');
 });
 
 test('single image declarations parse correctly', function() {
@@ -37,11 +39,25 @@ test('single image declarations parse correctly', function() {
   equal(img.w, 720, 'width set');
 });
 
+test('single image declarations with comma in url parse correctly', function() {
+  var s1 = new SrcsetInfo({srcset: 'imageresize?image=pear-mobile.jpg&rgn=0,4,65,128 100w'});
+  var img = s1.imageCandidates[0];
+  equal(img.src, 'imageresize?image=pear-mobile.jpg&rgn=0,4,65,128', 'image src validates');
+});
+
 test('multiple image candidates parse correctly', function() {
   var s1 = new SrcsetInfo({srcset: 'pear-mobile.jpeg 720w, pear-tablet.jpeg 1280w, pear-desktop.jpeg 1.5x'});
   equal(s1.imageCandidates.length, 3, '3 image candidates found');
   var img = s1.imageCandidates[2];
+  equal(img.src, "pear-desktop.jpeg", 'last image candidate src validates');
   equal(img.x, 1.5, 'last image candidate density is 1.5');
+});
+
+test('multiple image declarations with comma in url parse correctly', function() {
+  var s1 = new SrcsetInfo({srcset: 'imageresize?image=pear-mobile.jpg&rgn=0,4,65,128 720w,pear-tablet.jpeg 1280w,imageresize?image=pear-mobile.jpg&rgn=0,4,65,128 1.5x'});
+  equal(s1.imageCandidates.length, 3, '3 image candidates found');
+  var img = s1.imageCandidates[2];
+  equal(img.src, 'imageresize?image=pear-mobile.jpg&rgn=0,4,65,128', 'image image src is correct');
 });
 
 test('repeated values for image candidates are ignored', function() {
